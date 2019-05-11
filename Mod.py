@@ -1,55 +1,106 @@
 import numpy as np
+import random
 
 #this class simulates modulation
 
 class Mod:
-    def __init__(self,x,s):
+
+    def __init__(self,x): 
         #put parameters needed for the modulation scheme here
         self.input = x
-        self.omegac= 2000 #TODO: check this: carrier frequency/baseband? difference?
-        self.output = np.zeros(self.input.shape)
+        self.omegac= 2*np.pi*2000 
+        self.output = np.zeros(len(self.input),dtype=float)
 
     def bpsk(self):
+
         #modulates signal using binary phase shift keying (i.e sampling 1 bit at a time)
         #transmitted signal
-        t = np.zeros(self.input.shape)
         x = self.input
-        for i in range(0, x.length()):
+        t = np.zeros(len(x),dtype=complex)
+        for i in range(0, len(x)):
             if (x[i] == 0):
-                t[i] = -np.sin(self.omegac*i) #phase = -pi/2
+                t[i] = -1 #phase = -pi
             else:
-                t[i] = np.sin(self.omegac*i) #phase = pi/2
+                t[i] = 1 #phase = pi/2
+            
+        #note: I[i]  = 0, Q[i] = (+/-) 1 
+        # -> t[i] = (+/-)1 if mapped on a constellation diagram
 
-        #note: Q[i]  = 0, I[i] = (+/-) 1 
-        # -> t[i] = (+/-)j if mapped on a constellation diagram
-        self.output = t
-        return self.output
+        return t
 
     def qam4(self):
+
         #quadrature amplitude modulation; x = 4
-        t = np.zeros(self.input.shape)
         x = self.input
-        for i in range(0,(x.length()/4)):
-            t[(4*i):(4*i+1)] = 1 #set properly 
-            t[(4*i+2) : (4*i+3)] = 0 
-            
-        return self.output
+        t = np.zeros(len(x),dtype=complex)
+
+        a = 0
+        b = 0
+        i = 0
+
+        while i < len(x):
+            #0 -> +1, 1 -> -1  
+            #i.e. 00 -> (1,1), 10 -> (-1,1), 01 -> (1,-1), 11 -> (-1, -1)
+            a = np.power((-1),x[i])
+            b = np.power((-1),x[(i)+1])
+            t[i:(i+1)] = a + b*1j
+            i = i + 2
+        return t
 
     def qam16(self):
-        #quadrature amplitude modulation; x = 16
 
-        return self.output
+        #quadrature amplitude modulation; x = 16
+        x = self.input
+        t = np.zeros(len(x), dtype=complex)
+        a = 0
+        b = 0
+        i = 0
+
+        while i < len(x):
+            #00 -> 2, 01 -> 1, 10 -> -1, 11 -> -2  
+            #i.e. 4x4 constellation diagram  
+            a = np.power((-1),x[i])*(np.abs(np.power((-1),x[i]) + np.power((-1),x[i+1]))) 
+            b = np.power((-1),x[i+2])*(np.abs(np.power((-1),x[i+2]) + np.power((-1),x[i+3])))
+            i = i + 4
+            t[i:(i+3)] = a + b*1j
+
+        return t
 
     def schema(self, scheme):
         schema = {
-            0 : self.bpsk(),
-            1 : self.qam4(),
-            2 : self.qam16(),
+            0 : self.bpsk,
+            1 : self.qam4,
+            2 : self.qam16,
         } 
-        func=schema.get(scheme)
-        return func()
+
+        func=schema[scheme]()
+        
+        return func
 
     def apply(self,scheme):
         #apply scheme to input to get some modulated output
-        self.output = self.schema(scheme)
-        return self.output
+        y = self.schema(scheme)
+        print scheme
+        n = np.arange(0,len(self.input))
+
+        #modify this to analog equivalent- multiply by carrier wave
+        self.output = y*np.cos(self.omegac*n) 
+
+        return self.output         
+
+
+
+
+if __name__ == "__main__":
+#we may compute performance here
+    input = np.random.randint(2, size=256)
+    scheme = 2
+
+    modulator = Mod(input)
+    output = modulator.apply(scheme)
+    print output
+
+
+
+        
+

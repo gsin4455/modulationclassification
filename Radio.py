@@ -1,6 +1,8 @@
 import numpy as np
-from python_ml.Mod import Mod 
-from python_ml.Demod import Demod
+
+from Mod import Mod
+from Demod import Demod
+
 
 #this class simulates radio transmission
 
@@ -15,7 +17,8 @@ class Radio:
 
     def modulate(self):
         #modulate input signal to prepare for transmission
-        self.mod = Mod.apply(self.input, self.scheme)
+        modulator = Mod(self.input)
+        self.mod = modulator.apply(self.scheme)
         return self.mod
 
     def demodulate(self):
@@ -32,12 +35,13 @@ class Radio:
 
 if __name__ == "__main__":
     #we may compute performance here
-    input = np.random.rand(100) #TODO: change to a random input BINARY sequence
-    scheme = 0 #bpsk-default
+    input = np.random.randint(2, size=256)
+    scheme = 0 
     radio = Radio(input,scheme)
-    radio.modulate()
-    sig = radio.channel()
-    demod_sig = radio.demodulate()
+    y = radio.modulate()
+    print y
+    #sig = radio.channel()
+    #demod_sig = radio.demodulate()
     #compute error between input & output
 
 
