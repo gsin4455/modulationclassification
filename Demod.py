@@ -3,41 +3,24 @@ import numpy as np
 #this class simulates demodulation
 
 class Demod:
+
     def __init__(self,x):
         #put parameters implicity needed for estimating the modulation scheme here
         self.input = x
-
         #vector of unknowns: [omegac, symbols, phasec, etc.]
         self.u = np.zeros(5)
-        self.output = np.zeros(self.input.shape)
-
+        self.output = np.zeros(len(x))
 
     def bpsk(self):
-        #modulates signal using binary phase shift keying
-        x = self.input
-        omegac = self.u[0]
-        t = np.zeros(self.input.shape)
-        for i in range(0, x.length()):
-            '''' -not sure about this
-            if (x[i] == 0):
-                t[i] = -np.sin(omegac*i) #phase = -pi/2
-            else:
-                t[i] = np.sin(omegac*i) #phase = pi/2
-
-            '''
-       
-        self.output = t
+        #binary phase shift keying        
         return self.output
-
 
     def qam4(self):
         #quadrature amplitude modulation; x = 4
-
         return self.output
 
     def qam16(self):
         #quadrature amplitude modulation; x = 16
-
         return self.output
 
     def schema(self, scheme):
