@@ -12,7 +12,7 @@ class Mod:
     def __init__(self,x): 
         #put parameters needed for the modulation scheme here
         self.input = x
-        self.omegac= 2*np.pi*20000 
+        self.omegac= 2*np.pi*2000 
         self.output = np.zeros(len(self.input),dtype=float)
 
     def bpsk(self):
@@ -61,10 +61,11 @@ class Mod:
         return func
 
     def apply(self,scheme):
+        
         #apply scheme to input to get some modulated output
         y = self.schema(scheme)
         print scheme
-        nsamples = 2048
+        nsamples = 2048 #must be a power of 2 
         t = np.linspace(0, 5, nsamples)
         
         sample_bit = nsamples/len(y)
@@ -72,13 +73,12 @@ class Mod:
         yr = np.repeat(y, sample_bit)
         w = np.cos(self.omegac*t)*yr 
 
-        f,ax = plt.subplots(4,1, sharex=True, sharey=True, squeeze=True)
+        f,ax = plt.subplots(2,1, sharex=True, sharey=True, squeeze=True)
         ax[0].plot(t, w)
-        ax[0].axis([0, 0.2, -1.5, 1.5])
+        ax[0].axis([0, 0.5, -1.5, 1.5])
         ax[1].plot(t, yr)
         plt.show()
         
-        #modify this to analog equivalent- multiply by carrier wave
         self.output = w
         return self.output         
 
@@ -87,11 +87,12 @@ class Mod:
 if __name__ == "__main__":
 #we may compute performance here
     input = np.random.randint(2, size=64)
-    scheme = 0
+    print input
+    scheme = 1
 
     modulator = Mod(input)
     output = modulator.apply(scheme)
-    print output
+   
 
 
 
