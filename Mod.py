@@ -9,10 +9,11 @@ import random
 
 class Mod:
 
-    def __init__(self,x): 
+    def __init__(self,x,fb,fc): 
         #put parameters needed for the modulation scheme here
         self.input = x
-        self.omegac= 2*np.pi*2000 
+        self.fc = fc
+        self.fb = fb
         self.output = np.zeros(len(self.input),dtype=float)
 
     def bpsk(self):
@@ -56,26 +57,27 @@ class Mod:
             2 : self.qam16,
         } 
 
-        func=schema[scheme]()
+        output=schema[scheme]()
         
-        return func
+        return output
 
     def apply(self,scheme):
-        
+
         #apply scheme to input to get some modulated output
         y = self.schema(scheme)
-        print scheme
-        nsamples = 2048 #must be a power of 2 
-        t = np.linspace(0, 5, nsamples)
         
-        sample_bit = nsamples/len(y)
-        print sample_bit 
+        #sampling frequency
+        fs = 2*self.fc
+        sample_bit = fs/self.fb
+        t = np.linspace(0, (len(y)/self.fb), fs*(len(y)/self.fb))
+
         yr = np.repeat(y, sample_bit)
-        w = np.cos(self.omegac*t)*yr 
+
+        w = np.cos(2*np.pi*(self.fc)*t)*yr 
 
         f,ax = plt.subplots(2,1, sharex=True, sharey=True, squeeze=True)
         ax[0].plot(t, w)
-        ax[0].axis([0, 0.5, -1.5, 1.5])
+        ax[0].axis([0, 0.1, -1.5, 1.5])
         ax[1].plot(t, yr)
         plt.show()
         
@@ -86,11 +88,11 @@ class Mod:
 
 if __name__ == "__main__":
 #we may compute performance here
-    input = np.random.randint(2, size=64)
-    print input
-    scheme = 1
+    input = np.random.randint(2, size=256)
+    scheme = 0
 
-    modulator = Mod(input)
+    #frequency of carrier
+    modulator = Mod(input,64, 512)
     output = modulator.apply(scheme)
    
 

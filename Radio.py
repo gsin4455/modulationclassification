@@ -9,15 +9,18 @@ from Demod import Demod
 
 class Radio:
 
-    def __init__(self,x,s):
+    def __init__(self,x,s,fb, fc):
         self.input = x
         self.scheme = s
+        self.fb = fb
+        self.fc = fc
+        
         self.mod = np.zeros(self.input.shape)
         self.output = np.zeros(self.input.shape)
 
     def modulate(self):
         #modulate input signal to prepare for transmission
-        modulator = Mod(self.input)
+        modulator = Mod(self.input,self.fb, self.fc)
         self.mod = modulator.apply(self.scheme)
         return self.mod
 
@@ -35,9 +38,10 @@ class Radio:
 
 if __name__ == "__main__":
     #we may compute performance here
-    input = np.random.randint(2, size=256)
-    scheme = 0 
-    radio = Radio(input,scheme)
+    input = np.random.randint(2, size=64)
+    scheme = 1
+    #Radio(x, mod_scheme, bits/s, carrier frequency)
+    radio = Radio(input,scheme,64, 512)
     y = radio.modulate()
     print y
     #sig = radio.channel()
