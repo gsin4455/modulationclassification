@@ -66,19 +66,25 @@ class Mod:
         #apply scheme to input to get some modulated output
         y = self.schema(scheme)
         
-        #sampling frequency
+        #sampling frequency- nyquist theorem
         fs = 2*self.fc
         sample_bit = fs/self.fb
         t = np.linspace(0, (len(y)/self.fb), fs*(len(y)/self.fb))
 
         yr = np.repeat(y, sample_bit)
 
-        w = np.cos(2*np.pi*(self.fc)*t)*yr 
+        #convolving spectrum with DFT of carrier
+        w = np.cos(2*np.pi*(self.fc)*t)*yr
+        
+        #demodulated
+        d = np.cos(2*np.pi*(self.fc)*t)*w
 
-        f,ax = plt.subplots(2,1, sharex=True, sharey=True, squeeze=True)
+        f,ax = plt.subplots(4,1, sharex=True, sharey=True, squeeze=True)
         ax[0].plot(t, w)
         ax[0].axis([0, 0.1, -1.5, 1.5])
         ax[1].plot(t, yr)
+        ax[2].plot(t, d)
+
         plt.show()
         
         self.output = w
@@ -88,11 +94,11 @@ class Mod:
 
 if __name__ == "__main__":
 #we may compute performance here
-    input = np.random.randint(2, size=256)
+    input = np.random.randint(2, size=128)
     scheme = 0
 
     #frequency of carrier
-    modulator = Mod(input,64, 512)
+    modulator = Mod(input,128, 512)
     output = modulator.apply(scheme)
    
 

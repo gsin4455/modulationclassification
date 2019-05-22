@@ -39,11 +39,12 @@ class Radio:
 if __name__ == "__main__":
     #we may compute performance here
     input = np.random.randint(2, size=64)
-    scheme = 1
+    scheme = 0
     #Radio(x, mod_scheme, bits/s, carrier frequency)
-    radio = Radio(input,scheme,64, 512)
+    radio = Radio(input,scheme,64, 2048)
     y = radio.modulate()
-    print y
+
+    
     #sig = radio.channel()
     #demod_sig = radio.demodulate()
     #compute error between input & output
