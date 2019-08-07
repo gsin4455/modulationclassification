@@ -21,7 +21,7 @@ class Radio:
     def modulate(self):
         #modulate input signal to prepare for transmission
         modulator = Mod(self.input,self.fb, self.fc)
-        self.mod = modulator.apply(self.scheme)
+        self.mod = modulator.apply(self.scheme,4)
         return self.mod
 
     def demodulate(self):
@@ -39,9 +39,9 @@ class Radio:
 if __name__ == "__main__":
     #we may compute performance here
     input = np.random.randint(2, size=64)
-    scheme = 0
+    scheme = 1
     #Radio(x, mod_scheme, bits/s, carrier frequency)
-    radio = Radio(input,scheme,64, 2048)
+    radio = Radio(input,scheme,8, 32)
     y = radio.modulate()
 
     

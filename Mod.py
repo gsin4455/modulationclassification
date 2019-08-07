@@ -5,7 +5,11 @@ import scipy
 import matplotlib.pylab as plt
 import random
 
+from decimal import Decimal
+
 #this class simulates modulation
+
+
 
 class Mod:
 
@@ -15,91 +19,117 @@ class Mod:
         self.fc = fc
         self.fb = fb
         self.output = np.zeros(len(self.input),dtype=float)
+        self.fs = 2*self.fc
+        self.sample_bit = self.fs/self.fb
+        self.t =  np.linspace(0, (len(self.input)/self.fb), self.fs*(len(self.input)/self.fb))
+        self.bits = []
 
-    def bpsk(self):
+
+
+    def enc(self,x,s):
+
+
+        return y
+    def BCD(self,x): 
+      #Binary to Decimal converter (takes in bit sequence)
+        dec, i = 0, 0
+        for i in range(len(x)):
+            dec = dec + int(x[i])*np.power(2,len(x)-i-1)
+        return dec 
+
+    
+    def mpsk(self,m):
 
         #modulates signal using binary phase shift keying (i.e sampling 1 bit at a time)
         #transmitted signal
+        lm = int(np.log2(m))
         x = self.input
-        t = np.where(x==0, -1, 1)
+        M = int(len(x)/lm)
+        y = np.zeros(M)
 
-        return t
-
-    def qam4(self):
-
-        #quadrature amplitude modulation; x = 4
-        x = self.input
-        #t = np.zeros(len(x),dtype=complex)
-
-
-        a = np.power(-1, x[0::2])
-        b = np.power(-1, x[1::2])
-        t = a + b*1j
+        for i in range(M):
+            y[i] = self.BCD(x[(lm*i):(lm*i+lm)])
         
-        return t
-      
-    def qam16(self):
-        #00 -> 2, 01 -> 1, 10 -> -1, 11 -> -2  
-        #i.e. 4x4 constellation diagram  
-        #quadrature amplitude modulation; x = 16
+        self.bits = y
+        y = np.repeat(y, lm*self.sample_bit)
+        
+        s = np.cos(self.fc*self.t + 2*np.pi*(y)/(m))
+        #s  = self.t
+        return s
+
+    def qamm(self,m):
+        lm = int(np.log2(m))
         x = self.input
+        M = int(len(x)/lm)            
+        a = np.zeros(M)
+        b = np.zeros(M)
 
-        a = np.power((-1),x[0::4])*(np.abs(np.power((-1),x[0::4]) + np.power((-1),x[1::4]))) 
-        b = np.power((-1),x[2::4])*(np.abs(np.power((-1),x[2::4]) + np.power((-1),x[3::4])))
-        t = a + b*1j
-    
-        return t
+        for i in range(M):
+            z = x[lm*i: lm*i + lm]
+            a[i] = self.BCD(z[0::2])
+            b[i] = self.BCD(z[1::2])
+       
+        a = np.repeat(a,lm*self.sample_bit)
+        b = np.repeat(b, lm*self.sample_bit) 
+        s = a*np.cos(self.fc*self.t) + b*np.sin(self.fc*self.t)
+        return s
 
-    def schema(self, scheme):
+
+    def mask(self, m):
+        lm = int(np.log2(m))
+        x = self.input
+        M = int(len(x)/lm)
+        y = np.zeros(M)
+
+        for i in range(M):
+            y[i] = self.BCD(x[(lm*i):(lm*i+lm)])
+
+        self.bits = y
+        y = np.repeat(y, lm*self.sample_bit)
+       # self.t =  np.linspace(0, (len(self.input)/self.fb), num=self.fs*(len(self.input)/self.fb))
+        
+        s = y*np.cos(self.fc*self.t)
+        return s
+
+    def schema(self, scheme,m):
         schema = {
-            0 : self.bpsk,
-            1 : self.qam4,
-            2 : self.qam16,
+            0 : self.mpsk,
+            1 : self.qamm,
+            2 : self.mask,
         } 
 
-        output=schema[scheme]()
+        output=schema[scheme](m)
         
         return output
 
-    def apply(self,scheme):
-
+    def apply(self,scheme,m):
+        
+        
         #apply scheme to input to get some modulated output
-        y = self.schema(scheme)
+        y = self.schema(scheme,m)
         
-        #sampling frequency- nyquist theorem
-        fs = 2*self.fc
-        sample_bit = fs/self.fb
-        t = np.linspace(0, (len(y)/self.fb), fs*(len(y)/self.fb))
-
-        yr = np.repeat(y, sample_bit)
-
-        #convolving spectrum with DFT of carrier
-        w = np.cos(2*np.pi*(self.fc)*t)*yr
+        f,ax = plt.subplots(3,1, sharex=True, sharey=True, squeeze=True)
+        ax[0].plot(self.t, y, dashes = [6,2])
+        ax[0].axis([0, np.max(self.t),-4, 4])
+        ax[1].plot(self.t, np.repeat(self.input, self.sample_bit))
         
-        #demodulated
-        d = np.cos(2*np.pi*(self.fc)*t)*w
-
-        f,ax = plt.subplots(4,1, sharex=True, sharey=True, squeeze=True)
-        ax[0].plot(t, w)
-        ax[0].axis([0, 0.1, -1.5, 1.5])
-        ax[1].plot(t, yr)
-        ax[2].plot(t, d)
-
+        #ax[2].plot(self.t, np.repeat(self.bits, int(np.log2(m))*self.sample_bit))
+        
         plt.show()
         
-        self.output = w
+        self.output = y
         return self.output         
 
 
 
 if __name__ == "__main__":
 #we may compute performance here
-    input = np.random.randint(2, size=128)
+    #input = np.random.randint(2, size=128)
     scheme = 0
 
-    #frequency of carrier
-    modulator = Mod(input,128, 512)
-    output = modulator.apply(scheme)
+    
+    #modulator = Mod(input,128, 512)
+    #output = modulator.apply(scheme)
    
 
 
