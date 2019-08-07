@@ -25,11 +25,6 @@ class Mod:
         self.bits = []
 
 
-
-    def enc(self,x,s):
-
-
-        return y
     def BCD(self,x): 
       #Binary to Decimal converter (takes in bit sequence)
         dec, i = 0, 0
@@ -50,7 +45,6 @@ class Mod:
         for i in range(M):
             y[i] = self.BCD(x[(lm*i):(lm*i+lm)])
         
-        self.bits = y
         y = np.repeat(y, lm*self.sample_bit)
         
         s = np.cos(self.fc*self.t + 2*np.pi*(y)/(m))
@@ -84,10 +78,8 @@ class Mod:
         for i in range(M):
             y[i] = self.BCD(x[(lm*i):(lm*i+lm)])
 
-        self.bits = y
         y = np.repeat(y, lm*self.sample_bit)
-       # self.t =  np.linspace(0, (len(self.input)/self.fb), num=self.fs*(len(self.input)/self.fb))
-        
+
         s = y*np.cos(self.fc*self.t)
         return s
 
@@ -108,13 +100,11 @@ class Mod:
         #apply scheme to input to get some modulated output
         y = self.schema(scheme,m)
         
-        f,ax = plt.subplots(3,1, sharex=True, sharey=True, squeeze=True)
+        f,ax = plt.subplots(2,1, sharex=True, sharey=True, squeeze=True)
         ax[0].plot(self.t, y, dashes = [6,2])
         ax[0].axis([0, np.max(self.t),-4, 4])
         ax[1].plot(self.t, np.repeat(self.input, self.sample_bit))
-        
-        #ax[2].plot(self.t, np.repeat(self.bits, int(np.log2(m))*self.sample_bit))
-        
+            
         plt.show()
         
         self.output = y
@@ -124,13 +114,7 @@ class Mod:
 
 if __name__ == "__main__":
 #we may compute performance here
-    #input = np.random.randint(2, size=128)
-    scheme = 0
-
     
-    #modulator = Mod(input,128, 512)
-    #output = modulator.apply(scheme)
-   
 
 
 
