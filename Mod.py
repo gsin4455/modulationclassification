@@ -96,22 +96,14 @@ class Mod:
         #apply scheme to input to get some modulated output
         y = self.schema(scheme,m)
         
+        pn = 1/10 
+        noise = np.sqrt(pn/2)*np.random.randn(len(y))
+        rec_sig = y + noise
+
         f,ax = plt.subplots(2,1, sharex=True, sharey=True, squeeze=True)
         ax[0].plot(self.t,y, dashes = [6,2])
         ax[0].axis([0, np.max(self.t),-4, 4])
         ax[1].plot(self.t, np.repeat(self.input, self.sample_bit))
-        ''' 
-        A = 0.8
-        f = 64
-        t = np.arange(0,1,.01)
-        phi = np.pi/4
-        x = A*np.cos(2*np.pi*f*t)
-        plt.plot(t,x)
-        plt.axis([0,1,-1,1])
-        plt.xlabel('time in seconds')
-        plt.ylabel('amplitude')
-        #plt.show()
-        '''
         plt.show()
         
         self.output = y
