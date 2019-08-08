@@ -11,23 +11,20 @@ class Demod:
         self.u = np.zeros(5)
         self.output = np.zeros(len(x))
 
-    def bpsk(self):
-        #binary phase shift keying        
+    def mpsk(self,m):
         return self.output
 
-    def qam4(self):
-        #quadrature amplitude modulation; x = 4
+    def qamm(self,m):
         return self.output
 
-    def qam16(self):
-        #quadrature amplitude modulation; x = 16
+    def mask(self,m):
         return self.output
 
-    def schema(self, scheme):
+    def schema(self, scheme,m):
         schema = {
-            0 : self.bpsk(),
-            1 : self.qam4(),
-            2 : self.qam16(),
+            0 : self.mpsk(m),
+            1 : self.qamm(m),
+            2 : self.mask(m),
         } 
         func=schema.get(scheme)
         return func()
@@ -36,13 +33,15 @@ class Demod:
         #implement classification algorithm here
 
         scheme = 0
-        return scheme
+        m=0
+        return [scheme,m]
     
     def apply(self):
         #get some demodulated output after first preprocessing
         #classifier outputs modulation format
-        scheme = self.classify()
-        self.output = self.schema(scheme)
+        [scheme,m] = self.classify()
+        
+        self.output = self.schema(scheme,m)
 
         return self.output
 

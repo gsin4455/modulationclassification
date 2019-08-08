@@ -19,10 +19,10 @@ class Mod:
         self.fc = fc
         self.fb = fb
         self.output = np.zeros(len(self.input),dtype=float)
-        self.fs = 2*self.fc
+        self.fs = 32*self.fc
         self.sample_bit = self.fs/self.fb
         self.t =  np.linspace(0, (len(self.input)/self.fb), self.fs*(len(self.input)/self.fb))
-        self.bits = []
+
 
 
     def BCD(self,x): 
@@ -46,9 +46,7 @@ class Mod:
             y[i] = self.BCD(x[(lm*i):(lm*i+lm)])
         
         y = np.repeat(y, lm*self.sample_bit)
-        
-        s = np.cos(self.fc*self.t + 2*np.pi*(y)/(m))
-        #s  = self.t
+        s = np.cos(2*np.pi*self.fc*self.t + 2*np.pi*(y)/(m))
         return s
 
     def qamm(self,m):
@@ -59,13 +57,13 @@ class Mod:
         b = np.zeros(M)
 
         for i in range(M):
-            z = x[lm*i: lm*i + lm]
+            z = x[lm*i: lm*i+lm]
             a[i] = self.BCD(z[0::2])
             b[i] = self.BCD(z[1::2])
        
         a = np.repeat(a,lm*self.sample_bit)
         b = np.repeat(b, lm*self.sample_bit) 
-        s = a*np.cos(self.fc*self.t) + b*np.sin(self.fc*self.t)
+        s = a*np.cos(2*np.pi*self.fc*self.t) + b*np.sin(2*np.pi*self.fc*self.t)
         return s
 
 
@@ -77,10 +75,8 @@ class Mod:
 
         for i in range(M):
             y[i] = self.BCD(x[(lm*i):(lm*i+lm)])
-
         y = np.repeat(y, lm*self.sample_bit)
-
-        s = y*np.cos(self.fc*self.t)
+        s = np.multiply(y,np.cos(2*np.pi*self.fc*self.t))
         return s
 
     def schema(self, scheme,m):
@@ -101,10 +97,21 @@ class Mod:
         y = self.schema(scheme,m)
         
         f,ax = plt.subplots(2,1, sharex=True, sharey=True, squeeze=True)
-        ax[0].plot(self.t, y, dashes = [6,2])
+        ax[0].plot(self.t,y, dashes = [6,2])
         ax[0].axis([0, np.max(self.t),-4, 4])
         ax[1].plot(self.t, np.repeat(self.input, self.sample_bit))
-            
+        ''' 
+        A = 0.8
+        f = 64
+        t = np.arange(0,1,.01)
+        phi = np.pi/4
+        x = A*np.cos(2*np.pi*f*t)
+        plt.plot(t,x)
+        plt.axis([0,1,-1,1])
+        plt.xlabel('time in seconds')
+        plt.ylabel('amplitude')
+        #plt.show()
+        '''
         plt.show()
         
         self.output = y
@@ -113,10 +120,4 @@ class Mod:
 
 
 if __name__ == "__main__":
-#we may compute performance here
-    
-
-
-
-        
-
+    print("main")

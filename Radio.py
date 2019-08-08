@@ -15,8 +15,8 @@ class Radio:
         self.fb = fb
         self.fc = fc
         
-        self.mod = np.zeros(self.input.shape)
-        self.output = np.zeros(self.input.shape)
+        self.mod = np.zeros(len(self.input))
+        self.output = np.zeros(len(self.input))
 
     def modulate(self):
         #modulate input signal to prepare for transmission
@@ -29,24 +29,34 @@ class Radio:
         self.output = Demod.apply(self.mod)
         return self.output
 
-    def channel(self):
+    def channel(self, snr):
         #model physical constraints of a channel such as delay/distortion
-        #add random noise etc. perhaps
-        noise = np.random.rand(self.input.length())
+        
+        #Additive White Gaussian Noise (AWGN channel)
+        
+        #Linear Power of Noise 
+        pn = 1/snr 
+        noise = np.sqrt(pn/2)*np.random.randn(len(self.mod))
         rec_sig = self.mod + noise
         return rec_sig
 
+       
+
 if __name__ == "__main__":
     #we may compute performance here
-    input = np.random.randint(2, size=64)
+    input = np.random.randint(2, size=16)
+    #input = [1,0,1,0,1,0,1,0]
     scheme = 1
     #Radio(x, mod_scheme, bits/s, carrier frequency)
     radio = Radio(input,scheme,8, 32)
     y = radio.modulate()
 
-    
-    #sig = radio.channel()
-    #demod_sig = radio.demodulate()
+    #SNR_min = 1
+    #SNR_max = 9
+    snr = 1
+    sig = radio.channel(snr)
+
+    demod_sig = radio.demodulate()
     #compute error between input & output
 
 
