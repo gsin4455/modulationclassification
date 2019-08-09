@@ -19,7 +19,7 @@ class Mod:
         self.fc = fc
         self.fb = fb
         self.output = np.zeros(len(self.input),dtype=float)
-        self.fs = 32*self.fc
+        self.fs = 48*self.fc
         self.sample_bit = self.fs/self.fb
         self.t =  np.linspace(0, (len(self.input)/self.fb), self.fs*(len(self.input)/self.fb))
 
@@ -73,8 +73,10 @@ class Mod:
         M = int(len(x)/lm)
         y = np.zeros(M)
 
+
         for i in range(M):
             y[i] = self.BCD(x[(lm*i):(lm*i+lm)])
+        
         y = np.repeat(y, lm*self.sample_bit)
         s = np.multiply(y,np.cos(2*np.pi*self.fc*self.t))
         return s
@@ -95,16 +97,7 @@ class Mod:
         
         #apply scheme to input to get some modulated output
         y = self.schema(scheme,m)
-        
-        pn = 1/10 
-        noise = np.sqrt(pn/2)*np.random.randn(len(y))
-        rec_sig = y + noise
-
-        f,ax = plt.subplots(2,1, sharex=True, sharey=True, squeeze=True)
-        ax[0].plot(self.t,y, dashes = [6,2])
-        ax[0].axis([0, np.max(self.t),-4, 4])
-        ax[1].plot(self.t, np.repeat(self.input, self.sample_bit))
-        plt.show()
+      
         
         self.output = y
         return self.output         
